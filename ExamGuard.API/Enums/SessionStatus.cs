@@ -1,6 +1,9 @@
 ﻿namespace ExamGuard.API.Enums
 {
-    public class SessionStatus
+    public static class SessionStatus
     {
+        public const string Active = "Active";
+        public const string Submitted = "Submitted";
+        public const string Terminated = "Terminated";
     }
 }

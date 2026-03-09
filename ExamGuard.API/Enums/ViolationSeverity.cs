@@ -1,6 +1,11 @@
-﻿namespace ExamGuard.API.Enums
+﻿
+
+namespace ExamGuard.API.Enums
 {
-    public class ViolationSeverity
+    public static class ViolationSeverity
     {
+        public const string Low = "LOW";
+        public const string Medium = "MEDIUM";
+        public const string High = "HIGH";
     }
 }
