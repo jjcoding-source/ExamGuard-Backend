@@ -39,6 +39,7 @@ namespace ExamGuard.API.Middleware
                 statusCode = context.Response.StatusCode,
                 message = "An internal server error occurred.",
                 detail = ex.Message,
+                stackTrace = ex.StackTrace,
             };
 
             var json = JsonSerializer.Serialize(response);
