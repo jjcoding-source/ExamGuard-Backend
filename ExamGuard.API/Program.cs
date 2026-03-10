@@ -81,7 +81,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Enter: Bearer {your token}",
+        Description = "Enter: Bearer {g}",
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -124,5 +124,6 @@ app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<ExamGuard.API.Hubs.ProctorHub>("/hubs/proctor");
 
 app.Run();
