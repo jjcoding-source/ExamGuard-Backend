@@ -64,5 +64,37 @@ namespace ExamGuard.API.Controllers
             if (!result) return NotFound();
             return NoContent();
         }
+
+        [HttpGet("{id}/questions")]
+        public async Task<IActionResult> GetQuestions(int id)
+        {
+            var exam = await _examService.GetWithQuestionsAsync(id);
+            if (exam == null) return NotFound();
+            return Ok(exam.Questions);
+        }
+
+        [HttpPost("{id}/questions")]
+        [Authorize(Roles = UserRole.Instructor)]
+        public async Task<IActionResult> AddQuestion(
+            int id, [FromBody] CreateQuestionDto dto)
+        {
+            var instructorId = int.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var question = await _examService.AddQuestionAsync(id, dto, instructorId);
+            if (question == null) return NotFound();
+            return Ok(question);
+        }
+
+        [HttpDelete("{id}/questions/{questionId}")]
+        [Authorize(Roles = UserRole.Instructor)]
+        public async Task<IActionResult> DeleteQuestion(int id, int questionId)
+        {
+            var instructorId = int.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var result = await _examService.DeleteQuestionAsync(
+                id, questionId, instructorId);
+            if (!result) return NotFound();
+            return NoContent();
+        }
     }
 }

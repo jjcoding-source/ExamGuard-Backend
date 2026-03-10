@@ -11,5 +11,8 @@ namespace ExamGuard.API.Repositories.Interfaces
         Task<Exam> CreateAsync(Exam exam);
         Task<Exam> UpdateAsync(Exam exam);
         Task DeleteAsync(int id);
+        Task AddQuestionAsync(Question question);
+        Task<bool> DeleteQuestionAsync(int questionId);
+        Task<int> GetQuestionCountAsync(int examId);
     }
 }

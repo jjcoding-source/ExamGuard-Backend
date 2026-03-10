@@ -62,5 +62,24 @@ namespace ExamGuard.API.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task AddQuestionAsync(Question question)
+        {
+            _context.Questions.Add(question);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> DeleteQuestionAsync(int questionId)
+        {
+            var question = await _context.Questions.FindAsync(questionId);
+            if (question == null) return false;
+            _context.Questions.Remove(question);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<int> GetQuestionCountAsync(int examId)
+            => await _context.Questions.CountAsync(q => q.ExamId == examId);
+
     }
 }

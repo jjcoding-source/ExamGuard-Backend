@@ -21,6 +21,17 @@ namespace ExamGuard.API.Services
                 ? await _examRepo.GetByInstructorAsync(userId)
                 : await _examRepo.GetAllAsync();
 
+            var now = DateTime.UtcNow;
+            foreach (var exam in exams)
+            {
+                if (now < exam.StartTime)
+                    exam.Status = ExamStatus.Upcoming;
+                else if (now >= exam.StartTime && now <= exam.EndTime)
+                    exam.Status = ExamStatus.Live;
+                else
+                    exam.Status = ExamStatus.Ended;
+            }
+
             return exams.Select(MapToDto);
         }
 
@@ -28,6 +39,25 @@ namespace ExamGuard.API.Services
         {
             var exam = await _examRepo.GetByIdAsync(id);
             return exam == null ? null : MapToDto(exam);
+        }
+
+        public async Task<ExamResponseDto?> GetWithQuestionsAsync(int id)
+        {
+            var exam = await _examRepo.GetWithQuestionsAsync(id);
+            if (exam == null) return null;
+
+            var dto = MapToDto(exam);
+            dto.Questions = exam.Questions.Select(q => new QuestionResponseDto
+            {
+                Id = q.Id,
+                ExamId = q.ExamId,
+                Text = q.Text,
+                Options = q.Options.Split('|').ToList(),
+                CorrectIndex = q.CorrectIndex,
+                OrderIndex = q.OrderIndex,
+            }).ToList();
+
+            return dto;
         }
 
         public async Task<ExamResponseDto> CreateAsync(CreateExamDto dto, int instructorId)
@@ -71,6 +101,42 @@ namespace ExamGuard.API.Services
 
             await _examRepo.DeleteAsync(id);
             return true;
+        }
+
+        public async Task<QuestionResponseDto?> AddQuestionAsync(
+            int examId, CreateQuestionDto dto, int instructorId)
+        {
+            var exam = await _examRepo.GetByIdAsync(examId);
+            if (exam == null || exam.InstructorId != instructorId) return null;
+
+            var question = new Question
+            {
+                ExamId = examId,
+                Text = dto.Text,
+                Options = string.Join('|', dto.Options),
+                CorrectIndex = dto.CorrectIndex,
+                OrderIndex = await _examRepo.GetQuestionCountAsync(examId) + 1,
+            };
+
+            await _examRepo.AddQuestionAsync(question);
+
+            return new QuestionResponseDto
+            {
+                Id = question.Id,
+                ExamId = question.ExamId,
+                Text = question.Text,
+                Options = dto.Options,
+                CorrectIndex = question.CorrectIndex,
+                OrderIndex = question.OrderIndex,
+            };
+        }
+
+        public async Task<bool> DeleteQuestionAsync(
+            int examId, int questionId, int instructorId)
+        {
+            var exam = await _examRepo.GetByIdAsync(examId);
+            if (exam == null || exam.InstructorId != instructorId) return false;
+            return await _examRepo.DeleteQuestionAsync(questionId);
         }
 
         private static ExamResponseDto MapToDto(Exam exam) => new()

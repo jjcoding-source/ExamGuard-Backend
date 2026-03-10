@@ -11,5 +11,6 @@
         public string Status { get; set; } = string.Empty;
         public string InstructorName { get; set; } = string.Empty;
         public int StudentCount { get; set; }
+        public List<QuestionResponseDto> Questions { get; set; } = new();
     }
 }
